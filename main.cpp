@@ -1,29 +1,23 @@
 #include <iostream>
-#include <random>
 #include <unistd.h>
 #include <sys/ioctl.h>
-#include <sys/time.h>
-
-#include "main.h"
+#include <random>
+#include "main.hpp"
 
 int main() {
 
-    struct winsize w;
-    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    struct winsize window{};
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &window);
 
-    int height = w.ws_row;
-    printf ("lines %d\n", w.ws_row);
-    int width = w.ws_col;
-    printf ("columns %d\n", w.ws_col);
+    printf("lines %d\n", window.ws_row);
+    printf("columns %d\n", window.ws_col);
 
     std::cout << "Hello, World!" << std::endl;
 
-    bool screen[WIDTH][HEIGHT];
+    bool screen[2][WIDTH][HEIGHT];
 
-    render(screen, ACTION_CLR);
-    render(screen, ACTION_RAND);
-
-    screen[5][2] = true;
+    loopProcessing(screen, ProcessingAction::CLR);
+    loopProcessing(screen, ProcessingAction::RANDOMIZE);
 
     int cnt = 0;
 
@@ -32,40 +26,37 @@ int main() {
         logic(screen);
 
 
-        render(screen, ACTION_RENDER_IT);
+        loopProcessing(screen, ProcessingAction::RENDER);
         printf("\n %d ", ++cnt);
         usleep(1000000 / FPS);
 
     }
-
-
-    return 0;
 }
 
-void render(bool (&screen)[WIDTH][HEIGHT], int action) {
-    //system("clear");
+void loopProcessing(bool (&screen)[2][WIDTH][HEIGHT], int ProcessingAction) {
+    system("clear");
     for (int i = 0; i < HEIGHT; i++) {
         for (int j = 0; j < WIDTH; j++) {
-            switch (action) {
-                case ACTION_RENDER_IT: {
+            switch (ProcessingAction) {
+                case ProcessingAction::RENDER : {
                     if (j == 0) {
                         printf("\n");
                     }
-                    if (screen[i][j]) {
+                    if (screen[TMatrix::Main][i][j]) {
                         printf("+");
                     } else {
                         printf(" ");
                     }
                     break;
                 }
-                case ACTION_CLR: {
-                    screen[i][j] = false;
-                    if(i == j) screen[i][j] = true;
+                case ProcessingAction::CLR: {
+                    screen[TMatrix::Main][i][j] = false;
+                    //if (i == j) screen[TMatrix::Main][i][j] = true;
                     break;
                 }
-                case ACTION_RAND: {
+                case ProcessingAction::RANDOMIZE: {
 
-                    screen[i][j] = randomBool();
+                    screen[TMatrix::Main][i][j] = randomBool();
                     break;
                 }
                 default: {
@@ -75,25 +66,31 @@ void render(bool (&screen)[WIDTH][HEIGHT], int action) {
     }
 }
 
-void logic(bool (&screen)[WIDTH][HEIGHT]) {
-    bool temp[WIDTH][HEIGHT];
-    std::copy(&screen[0][0], &screen[0][0] + WIDTH * HEIGHT, &temp[0][0]);
+void logic(bool (&screen)[2][WIDTH][HEIGHT]) {
+    //bool temp[WIDTH][HEIGHT];
+    std::copy(&screen[TMatrix::Main][0][0], &screen[TMatrix::Main][0][0] + WIDTH * HEIGHT,
+              &screen[TMatrix::Temp][0][0]);
     //printf("\n ---");
-    //render(temp, ACTION_RENDER_IT);
+    //loopProcessing(temp, ACTION_RENDER_IT);
 
     int around;
     for (int i = 1; i < HEIGHT - 1; i++) {
         for (int j = 1; j < WIDTH - 1; j++) {
-            around = temp[i-1][j-1] + temp[i][j-1] + temp[i+1][j-1] +
-                    temp[i-1][j] + temp[i+1][j] +
-                    temp[i-1][j+1] + temp[i][j+1] + temp[i+1][j+1];
-            if(temp[i][j]) {
-                if(around > 3 || around < 2) {
-                    screen[i][j] = false;
+            around = screen[TMatrix::Temp][i - 1][j - 1] +
+                     screen[TMatrix::Temp][i][j - 1] +
+                     screen[TMatrix::Temp][i + 1][j - 1] +
+                     screen[TMatrix::Temp][i - 1][j] +
+                     screen[TMatrix::Temp][i + 1][j] +
+                     screen[TMatrix::Temp][i - 1][j + 1] +
+                     screen[TMatrix::Temp][i][j + 1] +
+                     screen[TMatrix::Temp][i + 1][j + 1];
+            if (&screen[TMatrix::Temp][i][j]) {
+                if (around > 3 || around < 2) {
+                    screen[TMatrix::Main][i][j] = false;
                 }
             } else {
-                if(around == 3) {
-                    screen[i][j] = true;
+                if (around == 3) {
+                    screen[TMatrix::Main][i][j] = true;
                 }
             }
         }
@@ -102,8 +99,9 @@ void logic(bool (&screen)[WIDTH][HEIGHT]) {
 }
 
 bool randomBool() {
-    struct timeval tp;
-    gettimeofday(&tp, NULL);
-    long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
-    return 0 + (rand() % (1 - 0 + 1)) == 1;
+    std::random_device random_device; // create object for seeding
+    std::mt19937 engine{random_device()}; // create engine and seed it
+    std::uniform_int_distribution<> dist(0,9); // create distribution for integers with [0; 9] range
+    auto random_number = dist(engine); // finally get a pseudo-random integer number
+    return random_number > 3;
 }

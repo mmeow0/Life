@@ -3,4 +3,4 @@ project(Life)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(Life main.cpp main.h)
+add_executable(Life main.cpp main.hpp)
