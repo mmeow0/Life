@@ -4,27 +4,7 @@
 #include <sys/ioctl.h>
 #include <sys/time.h>
 
-
-const int HEIGHT = 75;
-const int WIDTH = 245;
-const int FPS = 24;
-
-const int ACTION_RENDER_IT = 0;
-const int ACTION_CLR = 1;
-const int ACTION_RAND = 2;
-
-void render(bool (&screen)[WIDTH][HEIGHT], int action);
-
-
-void logic(bool (&screen)[WIDTH][HEIGHT]);
-
-bool randomBool() {
-    struct timeval tp;
-    gettimeofday(&tp, NULL);
-    long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
-    return 0 + (rand() % (1 - 0 + 1)) == 1;
-}
-
+#include "main.h"
 
 int main() {
 
@@ -119,4 +99,11 @@ void logic(bool (&screen)[WIDTH][HEIGHT]) {
         }
     }
 
+}
+
+bool randomBool() {
+    struct timeval tp;
+    gettimeofday(&tp, NULL);
+    long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+    return 0 + (rand() % (1 - 0 + 1)) == 1;
 }
