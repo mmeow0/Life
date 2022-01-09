@@ -6,7 +6,8 @@
 #include "life.h"
 
 Life::Life(QWidget *parent) : QWidget(parent) {
-    setStyleSheet("background-color:blue;");
+    setStyleSheet("background-color:pink;");
+    cell.load("red_apple.png");
     setFixedSize(ROWS*SIZE, COLUMNS*SIZE);
     initGame();
     startGame();
@@ -24,15 +25,15 @@ void Life::initGame() {
 
 void Life::startGame() {
     inGame = true;
-    doDrawing();
+
 }
+
 
 
 void Life::timerEvent(QTimerEvent *e) {
     Q_UNUSED(e);
     if (inGame) {
         update();
-        doDrawing();
     }
     repaint();
 }
@@ -58,16 +59,20 @@ void Life::update() {
     }
 }
 
+void Life::paintEvent(QPaintEvent *e) {
+    Q_UNUSED(e);
+    doDrawing();
+}
 
 void Life::doDrawing() {
-    printf("DRAWING\n");
+    QPainter qp(this);
     for (int i = 1; i < ROWS - 1; i++) {
         for (int j = 1; j < COLUMNS - 1; j++) {
            if(screen[i][j]){
-               //
+               qp.fillRect(i*SIZE, j*SIZE, SIZE, SIZE, Qt::darkMagenta);
            }
            else{
-               //
+              qp.fillRect(i*SIZE, j*SIZE, SIZE, SIZE, Qt::white);
            }
         }
     }

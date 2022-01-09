@@ -10,17 +10,18 @@
 class Life : public QWidget {
 public:
     Life(QWidget *parent = nullptr);
-    void setRect(QRect);
 
 protected:
     void timerEvent(QTimerEvent *);
+    void paintEvent(QPaintEvent *);
+
 
 
 private:
-    QRect rect;
-    static const int ROWS = 70;
-    static const int COLUMNS = 70;
-    static const int SIZE = 10;
+    QImage cell;
+    static const int ROWS = 140;
+    static const int COLUMNS = 140;
+    static const int SIZE = 5;
     static const int DELAY = 140;
     int timerId;
     bool screen[ROWS][COLUMNS];
