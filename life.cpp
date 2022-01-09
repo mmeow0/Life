@@ -6,7 +6,7 @@
 #include "life.h"
 
 Life::Life(QWidget *parent) : QWidget(parent) {
-    setStyleSheet("background-color:pink;");
+    setStyleSheet("background-color:green;");
     cell.load("red_apple.png");
     setFixedSize(ROWS*SIZE, COLUMNS*SIZE);
     initGame();
@@ -69,10 +69,10 @@ void Life::doDrawing() {
     for (int i = 1; i < ROWS - 1; i++) {
         for (int j = 1; j < COLUMNS - 1; j++) {
            if(screen[i][j]){
-               qp.fillRect(i*SIZE, j*SIZE, SIZE, SIZE, Qt::darkMagenta);
+               qp.fillRect(i*SIZE, j*SIZE, SIZE, SIZE, QColor(46 + i%(255-46), 139, 83, 255));
            }
            else{
-              qp.fillRect(i*SIZE, j*SIZE, SIZE, SIZE, Qt::white);
+              qp.fillRect(i*SIZE, j*SIZE, SIZE, SIZE, QColor(240, 255, 240, 255));
            }
         }
     }
